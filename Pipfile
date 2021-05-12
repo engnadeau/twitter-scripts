@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tweepy = "*"
+dynaconf = "*"
+fire = "*"
+
+[dev-packages]
+black = "*"
+isort = "*"
+rope = "*"
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
