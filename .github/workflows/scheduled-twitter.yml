@@ -1,0 +1,30 @@
+name: Prune Twitter on a CRON Schedule
+
+on:
+  schedule:
+    # “At 00:00 on Sunday.”
+    # https://crontab.guru
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+jobs:
+  build:
+    name: Trigger Pruning
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Install
+        run: |
+          pip install pipenv
+          pipenv install
+      - name: Run
+        env:
+          super_secret: ${{ secrets.SuperSecret }}
+          PERSONAL_CRON_API_KEY: ${{ secrets.API_KEY }}
+          PERSONAL_CRON_API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
+          PERSONAL_CRON_BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
+          PERSONAL_CRON_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          PERSONAL_CRON_ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+        run: |
+          pipenv run python scripts/prune_twitter.py prune_tweets
+          pipenv run python scripts/prune_twitter.py prune_friends
