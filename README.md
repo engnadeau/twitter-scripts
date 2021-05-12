@@ -2,7 +2,7 @@
 
 # Personal CRON
 
-Using GitHub Actions as a simple, hosted CRON job runner.
+Using GitHub Actions as a simple hosted CRON job runner.
 
 ## Motivation
 
