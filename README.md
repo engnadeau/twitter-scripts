@@ -1,5 +1,8 @@
 ![Banner](banner.jpg)
 
+[![Release](https://github.com/nnadeau/personal-cron/actions/workflows/release.yml/badge.svg)](https://github.com/nnadeau/personal-cron/actions/workflows/release.yml)
+[![Prune Twitter on a CRON Schedule](https://github.com/nnadeau/personal-cron/actions/workflows/scheduled-twitter.yml/badge.svg)](https://github.com/nnadeau/personal-cron/actions/workflows/scheduled-twitter.yml)
+
 # Personal CRON
 
 Using GitHub Actions as a simple hosted CRON job runner.
