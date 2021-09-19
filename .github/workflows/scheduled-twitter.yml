@@ -1,4 +1,4 @@
-name: Prune Twitter on a CRON Schedule
+name: Prune Twitter
 
 on:
   schedule:
