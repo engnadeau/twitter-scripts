@@ -67,7 +67,7 @@ def prune_tweets():
 
 def prune_friends():
     # set limit
-    limit = TODAY - datetime.timedelta(days=settings.FRIEND_PRUNE_DAYS)
+    limit = TODAY - datetime.timedelta(days=settings.twitter_friend_prune_days)
     logging.info(f"Friends inactive since {limit} will be unfriended")
 
     # auth
