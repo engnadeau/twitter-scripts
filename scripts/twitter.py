@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 TODAY = datetime.date.today()
 
 
-def rate_limit_handler(cursor):
+def _rate_limit_handler(cursor):
     while True:
         try:
             yield cursor.next()
@@ -24,7 +24,7 @@ def rate_limit_handler(cursor):
             break
 
 
-def authenticate():
+def _authenticate():
     logging.info("Authenticating...")
     auth = tweepy.OAuthHandler(
         settings.twitter_api_key, settings.twitter_api_secret_key
@@ -37,23 +37,23 @@ def authenticate():
     return api
 
 
-def prune_tweets():
-    # set limit
-    limit = TODAY - datetime.timedelta(days=settings.twitter_tweet_prune_days)
-    logging.info(f"Tweets older than {limit} will be deleted")
-
-    # auth
-    api = authenticate()
-
-    # prune
-    logging.info(f"{api.me().screen_name} has {api.me().statuses_count} tweets")
-
+def _get_tweets_iterator(api: tweepy.API) -> tweepy.Cursor:
     cursor = tweepy.Cursor(
         method=api.user_timeline, screen_name=api.me().screen_name, count=200
     ).items(api.me().statuses_count)
+    return cursor
+
+
+def prune_tweets(days: int = settings.twitter_tweet_prune_days):
+    limit = TODAY - datetime.timedelta(days=days)
+    logging.info(f"Tweets older than {limit} will be deleted")
+
+    api = _authenticate()
+    logging.info(f"{api.me().screen_name} has {api.me().statuses_count} tweets")
+    cursor = _get_tweets_iterator(api=api)
 
     logging.info("Fetching tweets...")
-    for t in rate_limit_handler(cursor):
+    for t in _rate_limit_handler(cursor):
         # check if outside time limit and not self-liked
         if t.created_at.date() < limit and not t.favorited:
             logging.info(f"Pruning: {t.id_str} | {t.created_at} | {t.text}")
@@ -65,13 +65,13 @@ def prune_tweets():
     logging.info("Pruning complete")
 
 
-def prune_friends():
+def prune_friends(days: int = settings.twitter_friend_prune_days):
     # set limit
-    limit = TODAY - datetime.timedelta(days=settings.twitter_friend_prune_days)
+    limit = TODAY - datetime.timedelta(days=days)
     logging.info(f"Friends inactive since {limit} will be unfriended")
 
     # auth
-    api = authenticate()
+    api = _authenticate()
 
     # prune
     logging.info(f"{api.me().screen_name} has {api.me().friends_count} friends")
@@ -81,7 +81,7 @@ def prune_friends():
     ).items(api.me().friends_count)
 
     logging.info("Fetching friends...")
-    for f in rate_limit_handler(cursor):
+    for f in _rate_limit_handler(cursor):
         try:
             is_stale_friend = f.status.created_at.date() < limit
         except AttributeError:
@@ -98,5 +98,48 @@ def prune_friends():
     logging.info("Pruning complete")
 
 
+def log_viral_tweets(
+    likes: int = settings.twitter_viral_likes,
+    retweets: int = settings.twitter_viral_retweets,
+):
+    logging.info(f"Logging personal tweets with {likes} likes or {retweets} retweets")
+
+    api = _authenticate()
+    cursor = _get_tweets_iterator(api=api)
+
+    logging.info("Fetching tweets...")
+    viral_tweets = []
+    for t in _rate_limit_handler(cursor):
+        if t.favorite_count >= likes or t.retweet_count >= retweets:
+            data = {
+                "id": t.id_str,
+                "created_at": str(t.created_at),
+                "favorite_count": t.favorite_count,
+                "retweet_count": t.retweet_count,
+                "text": t.text,
+                "hashtags": t.entities["hashtags"],
+                "mentions": t.entities["user_mentions"],
+                "retweeted": t.retweeted,
+            }
+            logging.info(f"Logging viral tweet: {data}")
+
+    logging.info("Logging complete")
+
+
+def log_stats():
+    api = _authenticate()
+    data = {
+        "followers": api.me().followers_count,
+        "friends": api.me().friends_count,
+        "listed_count": api.me().listed_count,
+        "verified": api.me().verified,
+    }
+    logging.info(f"Stats for {api.me().screen_name}: {data}")
+
+
 if __name__ == "__main__":
-    fire.Fire()
+    # fire.Fire()
+    # log_stats()
+    log_viral_tweets(3, 3)
+    # TODO: get mentions of self >> API.mentions_timeline
+    # TODO: retweet self tweets with like/viral >> API.retweet(id)
