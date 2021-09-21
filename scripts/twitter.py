@@ -124,6 +124,7 @@ def log_viral_tweets(
             logging.info(f"Logging viral tweet: {data}")
 
     logging.info("Logging complete")
+    # TODO: send logs to db
 
 
 def log_stats():
@@ -135,11 +136,12 @@ def log_stats():
         "verified": api.me().verified,
     }
     logging.info(f"Stats for {api.me().screen_name}: {data}")
+    # TODO: get mentions of self >> API.mentions_timeline
+    # TODO: send logs to db
 
 
 if __name__ == "__main__":
     # fire.Fire()
     # log_stats()
     log_viral_tweets(3, 3)
-    # TODO: get mentions of self >> API.mentions_timeline
-    # TODO: retweet self tweets with like/viral >> API.retweet(id)
+    # TODO: func to autoretweet self tweets with like/viral >> API.retweet(id)
