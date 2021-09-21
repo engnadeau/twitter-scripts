@@ -4,6 +4,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parents[1]
 
 settings = Dynaconf(
-    envvar_prefix="PERSONAL_CRON",
+    envvar_prefix="SOCIAL_MEDIA_CRON",
     settings_files=[ROOT_DIR / "settings.toml", ROOT_DIR / ".secrets.toml"],
 )
