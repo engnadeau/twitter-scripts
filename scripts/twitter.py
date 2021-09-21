@@ -1,9 +1,11 @@
-import tweepy
-from config import settings
 import datetime
 import logging
 import time
+
 import fire
+import tweepy
+
+from config import settings
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,16 +18,20 @@ def rate_limit_handler(cursor):
             yield cursor.next()
         except tweepy.RateLimitError:
             logging.warning(f"Rate limit exceeded")
-            logging.info(f"Sleeping for {settings.TWEEPY_SLEEP_TIME}s")
-            time.sleep(settings.TWEEPY_SLEEP_TIME)
+            logging.info(f"Sleeping for {settings.twitter_tweepy_sleep_time}s")
+            time.sleep(settings.twitter_tweepy_sleep_time)
         except StopIteration:
             break
 
 
 def authenticate():
     logging.info("Authenticating...")
-    auth = tweepy.OAuthHandler(settings.API_KEY, settings.API_SECRET_KEY)
-    auth.set_access_token(settings.ACCESS_TOKEN, settings.ACCESS_TOKEN_SECRET)
+    auth = tweepy.OAuthHandler(
+        settings.twitter_api_key, settings.twitter_api_secret_key
+    )
+    auth.set_access_token(
+        settings.twitter_access_token, settings.twitter_access_token_secret
+    )
     api = tweepy.API(auth)
     logging.info(f"Authenticated as: {api.me().screen_name}")
     return api
@@ -33,7 +39,7 @@ def authenticate():
 
 def prune_tweets():
     # set limit
-    limit = TODAY - datetime.timedelta(days=settings.TWEET_PRUNE_DAYS)
+    limit = TODAY - datetime.timedelta(days=settings.twitter_tweet_prune_days)
     logging.info(f"Tweets older than {limit} will be deleted")
 
     # auth
@@ -48,7 +54,8 @@ def prune_tweets():
 
     logging.info("Fetching tweets...")
     for t in rate_limit_handler(cursor):
-        if t.created_at.date() < limit:
+        # check if outside time limit and not self-liked
+        if t.created_at.date() < limit and not t.favorited:
             logging.info(f"Pruning: {t.id_str} | {t.created_at} | {t.text}")
             try:
                 api.destroy_status(t.id_str)
