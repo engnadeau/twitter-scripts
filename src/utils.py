@@ -6,6 +6,7 @@ from config import settings
 
 
 def _get_logger(name: str) -> logging.Logger:
+    Path(settings.logging.handlers.file.filename).parent.mkdir(exist_ok=True)
     logging.config.dictConfig(settings.logging.to_dict())
     logger = logging.getLogger(name)
     return logger
