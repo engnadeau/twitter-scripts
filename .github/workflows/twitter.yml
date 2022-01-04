@@ -1,4 +1,4 @@
-name: Prune Twitter
+name: Twitter
 
 on:
   schedule:
