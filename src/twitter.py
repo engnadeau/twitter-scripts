@@ -105,7 +105,7 @@ def prune_friends(
 
             # unfriend
             try:
-                api.destroy_friendship(f.screen_name)
+                api.destroy_friendship(screen_name=f.screen_name)
             except tweepy.error.TweepError as e:
                 LOGGER.error(e)
 
