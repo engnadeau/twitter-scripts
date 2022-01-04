@@ -51,7 +51,7 @@ def prune_tweets(
     )
 
     LOGGER.info("Fetching tweets...")
-    for t in tweepy.Cursor(method=api.user_timeline).items():
+    for t in tweepy.Cursor(method=api.user_timeline, count=100).items():
         # check if outside time limit and if self-liked
         if t.created_at.date() < limit and (not t.favorited or delete_liked):
             LOGGER.info(f"Pruning: {t.id_str} | {t.created_at.date()} | {t.text}")
@@ -87,7 +87,7 @@ def prune_friends(
     )
 
     LOGGER.info("Fetching friends...")
-    for f in tweepy.Cursor(method=api.get_friends).items():
+    for f in tweepy.Cursor(method=api.get_friends, count=200).items():
         try:
             last_tweet_date = f.status.created_at.date()
             days_since_last_tweet = (TODAY - last_tweet_date).days
