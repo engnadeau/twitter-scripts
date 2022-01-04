@@ -1,5 +1,29 @@
-twitter_tweet_prune_days=60
-twitter_friend_prune_days=30
-twitter_tweepy_sleep_time=910
-twitter_viral_likes=3
-twitter_viral_retweets=3
+output_directory="out"
+
+[twitter]
+tweepy_sleep_time=910
+tweet_prune_days=60
+is_delete_liked=false
+friend_prune_days=30
+
+[logging]
+version=1
+disable_existing_loggers=false
+
+[logging.root]
+level="INFO"
+handlers=["console", "file"]
+
+[logging.handlers.console]
+class="logging.StreamHandler"
+formatter="simple"
+
+[logging.handlers.file]
+class="logging.handlers.RotatingFileHandler"
+formatter="simple"
+filename="social.log"
+maxBytes=1024
+backupCount=3
+
+[logging.formatters.simple]
+format="%(asctime)-15s | %(name)-5s | %(levelname)-8s | %(message)s"
