@@ -143,4 +143,8 @@ cython_debug/
 
 # NN: ignore vscode
 .vscode/
+
+# app ignores
 out/
+logs/
+*.log
