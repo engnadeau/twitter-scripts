@@ -28,5 +28,3 @@ if __name__ == "__main__":
     LOGGER.info("Hello INFO")
     LOGGER.warning("Hello WARNING")
     LOGGER.error("Hello ERROR")
-
-    LOGGER.info(settings.to_dict())
