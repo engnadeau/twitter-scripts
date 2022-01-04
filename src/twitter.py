@@ -1,8 +1,4 @@
 import datetime
-import json
-import logging
-import time
-from pathlib import Path
 
 import fire
 import tweepy
