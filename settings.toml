@@ -21,7 +21,7 @@ formatter="simple"
 [logging.handlers.file]
 class="logging.handlers.RotatingFileHandler"
 formatter="simple"
-filename="social.log"
+filename="logs/social.log"
 maxBytes=1024
 backupCount=3
 
