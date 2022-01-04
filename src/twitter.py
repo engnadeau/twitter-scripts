@@ -26,7 +26,7 @@ def _authenticate():
             f"Authenticated as {user.screen_name} with {user.statuses_count} tweets"
         )
     except tweepy.Unauthorized as e:
-        LOGGER.exception("Authentication failed")
+        LOGGER.exception(e)
     return api
 
 
@@ -42,9 +42,7 @@ def prune_tweets(
     LOGGER.info(f"Tweets older than {days} days ({limit}) will be deleted")
 
     api = _authenticate()
-    LOGGER.info(
-        f"{api.verify_credentials().screen_name} has {api.verify_credentials().statuses_count} tweets"
-    )
+    LOGGER.info(f"Authenticated as {api.verify_credentials().screen_name}")
 
     LOGGER.info("Fetching tweets...")
     for t in tweepy.Cursor(method=api.user_timeline, count=100).items():
@@ -78,9 +76,9 @@ def prune_friends(
     api = _authenticate()
 
     # prune
-    LOGGER.info(
-        f"{api.verify_credentials().screen_name} has {api.verify_credentials().friends_count} friends"
-    )
+    screen_name = api.verify_credentials().screen_name
+    friends_count = api.verify_credentials().friends_count
+    LOGGER.info(f"{screen_name} has {friends_count} friends")
 
     LOGGER.info("Fetching friends...")
     for f in tweepy.Cursor(method=api.get_friends, count=200).items():
