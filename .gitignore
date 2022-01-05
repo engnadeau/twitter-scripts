@@ -142,4 +142,9 @@ dmypy.json
 cython_debug/
 
 # NN: ignore vscode
-.vscode/settings.json
+.vscode/
+
+# app ignores
+out/
+logs/
+*.log
