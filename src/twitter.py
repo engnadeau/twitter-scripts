@@ -83,11 +83,11 @@ def prune_friends(
     LOGGER.info("Fetching friends...")
     for f in tweepy.Cursor(method=api.get_friends, count=200).items():
         try:
-            last_tweet_date = f.status.created_at.date()
-            days_since_last_tweet = (TODAY - last_tweet_date).days
+            days_since_last_tweet = (TODAY - f.status.created_at.date()).days
             is_stale_friend = days_since_last_tweet > days
         except AttributeError:
             LOGGER.info(f"{f.screen_name} has never tweeted")
+            days_since_last_tweet = None
             is_stale_friend = True
 
         if is_stale_friend:
