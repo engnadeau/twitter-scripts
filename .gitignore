@@ -148,3 +148,4 @@ cython_debug/
 out/
 logs/
 *.log
+*.json
