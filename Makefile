@@ -11,6 +11,9 @@ all: clean format check
 clean:
 	-rm -rf $(OUTPUT_DIR)
 
+.PHONY: lint
+lint: check
+
 .PHONY: check
 check:
 	pipenv run black --check .
