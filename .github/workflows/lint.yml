@@ -1,0 +1,21 @@
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Install
+        run: |
+          pip install pipenv
+          pipenv install --dev
+      - name: Run
+        run: |
+          make check
