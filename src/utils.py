@@ -6,6 +6,7 @@ from pathlib import Path
 from config import settings
 
 
+def get_logger(name: str) -> logging.Logger:
     """Create logger."""
     Path(settings.logging.handlers.file.filename).parent.mkdir(exist_ok=True)
     logging.config.dictConfig(settings.logging.to_dict())
@@ -13,16 +14,7 @@ from config import settings
     return logger
 
 
-LOGGER = _get_logger("utils")
-
-
-def _get_output_path(fname: str) -> Path:
-    output_dir = Path.cwd() / settings.output_directory
-    output_dir.mkdir(exist_ok=True)
-
-    path = output_dir / fname
-    LOGGER.info(f"Output path: {path}")
-    return path
+LOGGER = get_logger("utils")
 
 
 if __name__ == "__main__":

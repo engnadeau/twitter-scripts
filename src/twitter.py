@@ -8,7 +8,7 @@ import utils
 from config import settings
 
 TODAY = datetime.date.today()
-LOGGER = utils._get_logger("twitter")
+LOGGER = utils.get_logger("twitter")
 
 
 def _authenticate():
