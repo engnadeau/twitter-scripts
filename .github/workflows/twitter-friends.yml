@@ -1,4 +1,4 @@
-name: Twitter
+name: Prune Twitter Friends
 
 on:
   schedule:
@@ -29,5 +29,4 @@ jobs:
           SOCIAL_MEDIA_CRON_TWITTER__ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           SOCIAL_MEDIA_CRON_TWITTER__ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
         run: |
-          pipenv run python src/twitter.py prune_tweets
           pipenv run python src/twitter.py prune_friends
