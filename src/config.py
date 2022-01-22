@@ -1,3 +1,4 @@
+"""Configuration handler."""
 from pathlib import Path
 
 from dynaconf import Dynaconf

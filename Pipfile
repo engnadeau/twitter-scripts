@@ -13,6 +13,9 @@ black = "*"
 isort = "*"
 rope = "*"
 flake8 = "*"
+vulture = "*"
+pylint = "*"
+bandit = "*"
 
 [requires]
 python_version = "3.8"

@@ -11,11 +11,17 @@ all: clean format check
 clean:
 	-rm -rf $(OUTPUT_DIR)
 
+.PHONY: lint
+lint: check
+
 .PHONY: check
 check:
+	find . -type f -name "*.py" | xargs pipenv run pylint -j 0
+	pipenv run bandit -r .
 	pipenv run black --check .
-	pipenv run isort --check .
 	pipenv run flake8 .
+	pipenv run isort --check .
+	pipenv run vulture .
 
 .PHONY: format
 format:

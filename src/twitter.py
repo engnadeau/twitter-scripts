@@ -1,3 +1,4 @@
+"""Twitter handler."""
 import datetime
 
 import fire
@@ -7,10 +8,11 @@ import utils
 from config import settings
 
 TODAY = datetime.date.today()
-LOGGER = utils._get_logger("twitter")
+LOGGER = utils.get_logger("twitter")
 
 
 def _authenticate():
+    """Create authenticated API object."""
     LOGGER.info("Authenticating...")
     auth = tweepy.OAuthHandler(
         settings.twitter.api_key, settings.twitter.api_secret_key
@@ -35,6 +37,17 @@ def prune_tweets(
     delete_liked: bool = settings.twitter.is_delete_liked,
     dry_run: bool = False,
 ):
+    """Delete old tweets.
+
+    Args:
+        days (int, optional):
+            Limit on number of days old.
+            Defaults to settings.twitter.tweet_prune_days.
+        delete_liked (bool, optional):
+            If self-liked tweets are deleted.
+            Defaults to settings.twitter.is_delete_liked.
+        dry_run (bool, optional): If deleting should be skipped. Defaults to False.
+    """
     if dry_run:
         LOGGER.info("Dry run enabled".upper())
 
@@ -45,10 +58,12 @@ def prune_tweets(
     LOGGER.info(f"Authenticated as {api.verify_credentials().screen_name}")
 
     LOGGER.info("Fetching tweets...")
-    for t in tweepy.Cursor(method=api.user_timeline, count=100).items():
+    for tweet in tweepy.Cursor(method=api.user_timeline, count=100).items():
         # check if outside time limit and if self-liked
-        if t.created_at.date() < limit and (not t.favorited or delete_liked):
-            LOGGER.info(f"Pruning: {t.id_str} | {t.created_at.date()} | {t.text}")
+        if tweet.created_at.date() < limit and (not tweet.favorited or delete_liked):
+            LOGGER.info(
+                f"Pruning: {tweet.id_str} | {tweet.created_at.date()} | {tweet.text}"
+            )
 
             # skip if dry run
             if dry_run:
@@ -56,8 +71,8 @@ def prune_tweets(
 
             # delete tweet
             try:
-                api.destroy_status(t.id_str)
-            except tweepy.error.TweepError as e:
+                api.destroy_status(tweet.id_str)
+            except tweepy.TweepyException as e:
                 LOGGER.error(e)
 
     LOGGER.info("Pruning complete")
@@ -66,6 +81,16 @@ def prune_tweets(
 def prune_friends(
     days: int = settings.twitter.friend_prune_days, dry_run: bool = False
 ):
+    """Delete old friends.
+
+    Args:
+        days (int, optional):
+            Limit of days since last tweet.
+            Defaults to settings.twitter.friend_prune_days.
+        dry_run (bool, optional):
+            If deleting should be skipped.
+            Defaults to False.
+    """
     if dry_run:
         LOGGER.info("Dry run enabled".upper())
 
@@ -81,17 +106,17 @@ def prune_friends(
     LOGGER.info(f"{screen_name} has {friends_count} friends")
 
     LOGGER.info("Fetching friends...")
-    for f in tweepy.Cursor(method=api.get_friends, count=200).items():
+    for friend in tweepy.Cursor(method=api.get_friends, count=200).items():
         try:
-            days_since_last_tweet = (TODAY - f.status.created_at.date()).days
+            days_since_last_tweet = (TODAY - friend.status.created_at.date()).days
             is_stale_friend = days_since_last_tweet > days
         except AttributeError:
-            LOGGER.info(f"{f.screen_name} has never tweeted")
+            LOGGER.info(f"{friend.screen_name} has never tweeted")
             days_since_last_tweet = None
             is_stale_friend = True
 
         if is_stale_friend:
-            LOGGER.info(f"Pruning: {f.screen_name} | {days_since_last_tweet} days")
+            LOGGER.info(f"Pruning: {friend.screen_name} | {days_since_last_tweet} days")
 
             # skip if dry run
             if dry_run:
@@ -99,8 +124,8 @@ def prune_friends(
 
             # unfriend
             try:
-                api.destroy_friendship(screen_name=f.screen_name)
-            except tweepy.error.TweepError as e:
+                api.destroy_friendship(screen_name=friend.screen_name)
+            except tweepy.TweepyException as e:
                 LOGGER.error(e)
 
     LOGGER.info("Pruning complete")
