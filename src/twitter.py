@@ -1,3 +1,4 @@
+"""Twitter handler."""
 import datetime
 
 import fire
@@ -11,6 +12,7 @@ LOGGER = utils._get_logger("twitter")
 
 
 def _authenticate():
+    """Create authenticated API object."""
     LOGGER.info("Authenticating...")
     auth = tweepy.OAuthHandler(
         settings.twitter.api_key, settings.twitter.api_secret_key
@@ -35,6 +37,17 @@ def prune_tweets(
     delete_liked: bool = settings.twitter.is_delete_liked,
     dry_run: bool = False,
 ):
+    """Delete old tweets.
+
+    Args:
+        days (int, optional):
+            Limit on number of days old.
+            Defaults to settings.twitter.tweet_prune_days.
+        delete_liked (bool, optional):
+            If self-liked tweets are deleted.
+            Defaults to settings.twitter.is_delete_liked.
+        dry_run (bool, optional): If deleting should be skipped. Defaults to False.
+    """
     if dry_run:
         LOGGER.info("Dry run enabled".upper())
 
@@ -66,6 +79,16 @@ def prune_tweets(
 def prune_friends(
     days: int = settings.twitter.friend_prune_days, dry_run: bool = False
 ):
+    """Delete old friends.
+
+    Args:
+        days (int, optional):
+            Limit of days since last tweet.
+            Defaults to settings.twitter.friend_prune_days.
+        dry_run (bool, optional):
+            If deleting should be skipped.
+            Defaults to False.
+    """
     if dry_run:
         LOGGER.info("Dry run enabled".upper())
 
