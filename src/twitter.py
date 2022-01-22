@@ -1,5 +1,8 @@
 """Twitter handler."""
 import datetime
+import json
+from pathlib import Path
+from typing import Optional
 
 import fire
 import tweepy
@@ -30,6 +33,79 @@ def _authenticate():
     except tweepy.Unauthorized as e:
         LOGGER.exception(e)
     return api
+
+
+def _fetch_people_from_user(api: tweepy.API, people_type: str, screen_name: str):
+    LOGGER.info(f"Fetching {people_type.lower()} from {screen_name}")
+    if people_type.lower() == "friends":
+        cursor = tweepy.Cursor(
+            method=api.get_friends, count=200, screen_name=screen_name
+        ).items()
+    elif people_type.lower() == "followers":
+        cursor = tweepy.Cursor(
+            method=api.get_followers, count=200, screen_name=screen_name
+        ).items()
+    else:
+        raise ValueError("People must be FRIENDS or FOLLOWERS")
+
+    # pylint: disable=protected-access
+    people = [person._json for person in cursor]
+    return people
+
+
+def dump_users(
+    people_type: Optional[str] = None,
+    screen_name: Optional[str] = None,
+    output: Optional[str] = None,
+):
+    """Fetch and dump users.
+
+    Args:
+        people_type (Optional[str], optional):
+            Type of people to fetch; FRIENDS or FOLLOWERS.
+            Defaults to None.
+        screen_name (Optional[str], optional):
+            User to fetch people from.
+            Defaults to None.
+        input (Optional[str], optional):
+            Alternative source of users from list.
+            Defaults to None.
+        output (Optional[str], optional):
+            Output path to dump users.
+            Defaults to None.
+
+    Raises:
+        ValueError: [description]
+        ValueError: [description]
+    """
+    # authenticate first; needed in many places
+    api = _authenticate()
+
+    # if we didn't specify someone else, default to authenticated user
+    if not screen_name:
+        screen_name = api.verify_credentials().screen_name
+
+    # prepare paths
+    if output:
+        output_path = Path(output)
+    elif people_type:
+        output_path = Path().cwd() / f"{screen_name}-{people_type}.json".lower()
+    else:
+        raise ValueError("Invalid output configuration.")
+
+    # choose where get people from: list or user
+    if people_type:
+        people = _fetch_people_from_user(
+            api=api, people_type=people_type, screen_name=screen_name
+        )
+    else:
+        raise ValueError("Either PEOPLE_TYPE or PATH must not be NONE")
+    LOGGER.info(f"Retrieved {len(people)} people")
+
+    # dump to file
+    LOGGER.info(f"Dumping results to {output_path.resolve()}")
+    with open(output_path, "w") as f:
+        json.dump(obj=people, fp=f, indent=4)
 
 
 def prune_tweets(
