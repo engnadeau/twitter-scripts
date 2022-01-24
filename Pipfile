@@ -7,8 +7,6 @@ name = "pypi"
 tweepy = "*"
 dynaconf = "*"
 fire = "*"
-seaborn = "*"
-pandas = "*"
 
 [dev-packages]
 black = "*"
