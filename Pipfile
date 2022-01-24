@@ -16,6 +16,9 @@ flake8 = "*"
 vulture = "*"
 pylint = "*"
 bandit = "*"
+matplotlib = "*"
+pandas = "*"
+seaborn = "*"
 
 [requires]
 python_version = "3.8"
