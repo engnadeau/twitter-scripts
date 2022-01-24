@@ -27,3 +27,7 @@ check:
 format:
 	pipenv run black .
 	pipenv run isort .
+
+.PHONY: install-extras
+install-extras:
+	pipenv run python -m pip install -r requirements-plot.txt
