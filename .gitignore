@@ -149,3 +149,4 @@ out/
 logs/
 *.log
 *.json
+*.png
