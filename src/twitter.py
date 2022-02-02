@@ -14,7 +14,7 @@ TODAY = datetime.date.today()
 LOGGER = utils.get_logger("twitter")
 
 
-def _authenticate():
+def _authenticate(wait_on_rate_limit: bool = True):
     """Create authenticated API object."""
     LOGGER.info("Authenticating...")
     auth = tweepy.OAuthHandler(
@@ -23,7 +23,7 @@ def _authenticate():
     auth.set_access_token(
         settings.twitter.access_token, settings.twitter.access_token_secret
     )
-    api = tweepy.API(auth, wait_on_rate_limit=True)
+    api = tweepy.API(auth, wait_on_rate_limit=wait_on_rate_limit)
 
     try:
         user = api.verify_credentials()
@@ -112,6 +112,7 @@ def prune_tweets(
     days: int = settings.twitter.tweet_prune_days,
     delete_liked: bool = settings.twitter.is_delete_liked,
     dry_run: bool = False,
+    wait_on_rate_limit: bool = True,
 ):
     """Delete old tweets.
 
@@ -130,32 +131,44 @@ def prune_tweets(
     limit = TODAY - datetime.timedelta(days=days)
     LOGGER.info(f"Tweets older than {days} days ({limit}) will be deleted")
 
-    api = _authenticate()
+    api = _authenticate(wait_on_rate_limit=wait_on_rate_limit)
     LOGGER.info(f"Authenticated as {api.verify_credentials().screen_name}")
 
     LOGGER.info("Fetching tweets...")
-    for tweet in tweepy.Cursor(method=api.user_timeline, count=100).items():
-        # check if outside time limit and if self-liked
-        if tweet.created_at.date() < limit and (not tweet.favorited or delete_liked):
-            LOGGER.info(
-                f"Pruning: {tweet.id_str} | {tweet.created_at.date()} | {tweet.text}"
-            )
+    try:
+        for tweet in tweepy.Cursor(method=api.user_timeline, count=100).items():
+            # check if outside time limit and if self-liked
+            if tweet.created_at.date() < limit and (
+                not tweet.favorited or delete_liked
+            ):
+                LOGGER.info(
+                    (
+                        "Pruning: "
+                        f"{tweet.id_str} |"
+                        f"{tweet.created_at.date()} |"
+                        f"{tweet.text}"
+                    )
+                )
 
-            # skip if dry run
-            if dry_run:
-                continue
+                # skip if dry run
+                if dry_run:
+                    continue
 
-            # delete tweet
-            try:
-                api.destroy_status(tweet.id_str)
-            except tweepy.TweepyException as e:
-                LOGGER.error(e)
+                # delete tweet
+                try:
+                    api.destroy_status(tweet.id_str)
+                except tweepy.TweepyException as e:
+                    LOGGER.error(e)
+    except tweepy.errors.TooManyRequests as e:
+        LOGGER.error(e)
 
     LOGGER.info("Pruning complete")
 
 
 def prune_friends(
-    days: int = settings.twitter.friend_prune_days, dry_run: bool = False
+    days: int = settings.twitter.friend_prune_days,
+    dry_run: bool = False,
+    wait_on_rate_limit: bool = True,
 ):
     """Delete old friends.
 
@@ -174,7 +187,7 @@ def prune_friends(
     LOGGER.info(f"Friends inactive since {days} days will be unfriended")
 
     # auth
-    api = _authenticate()
+    api = _authenticate(wait_on_rate_limit=wait_on_rate_limit)
 
     # prune
     screen_name = api.verify_credentials().screen_name
@@ -182,27 +195,32 @@ def prune_friends(
     LOGGER.info(f"{screen_name} has {friends_count} friends")
 
     LOGGER.info("Fetching friends...")
-    for friend in tweepy.Cursor(method=api.get_friends, count=200).items():
-        try:
-            days_since_last_tweet = (TODAY - friend.status.created_at.date()).days
-            is_stale_friend = days_since_last_tweet > days
-        except AttributeError:
-            LOGGER.info(f"{friend.screen_name} has never tweeted")
-            days_since_last_tweet = None
-            is_stale_friend = True
-
-        if is_stale_friend:
-            LOGGER.info(f"Pruning: {friend.screen_name} | {days_since_last_tweet} days")
-
-            # skip if dry run
-            if dry_run:
-                continue
-
-            # unfriend
+    try:
+        for friend in tweepy.Cursor(method=api.get_friends, count=200).items():
             try:
-                api.destroy_friendship(screen_name=friend.screen_name)
-            except tweepy.TweepyException as e:
-                LOGGER.error(e)
+                days_since_last_tweet = (TODAY - friend.status.created_at.date()).days
+                is_stale_friend = days_since_last_tweet > days
+            except AttributeError:
+                LOGGER.info(f"{friend.screen_name} has never tweeted")
+                days_since_last_tweet = None
+                is_stale_friend = True
+
+            if is_stale_friend:
+                LOGGER.info(
+                    f"Pruning: {friend.screen_name} | {days_since_last_tweet} days"
+                )
+
+                # skip if dry run
+                if dry_run:
+                    continue
+
+                # unfriend
+                try:
+                    api.destroy_friendship(screen_name=friend.screen_name)
+                except tweepy.TweepyException as e:
+                    LOGGER.error(e)
+    except tweepy.errors.TooManyRequests as e:
+        LOGGER.error(e)
 
     LOGGER.info("Pruning complete")
 
