@@ -14,7 +14,7 @@ TODAY = datetime.date.today()
 LOGGER = utils.get_logger("twitter")
 
 
-def _authenticate():
+def _authenticate(wait_on_rate_limit: bool = True):
     """Create authenticated API object."""
     LOGGER.info("Authenticating...")
     auth = tweepy.OAuthHandler(
@@ -23,7 +23,7 @@ def _authenticate():
     auth.set_access_token(
         settings.twitter.access_token, settings.twitter.access_token_secret
     )
-    api = tweepy.API(auth, wait_on_rate_limit=True)
+    api = tweepy.API(auth, wait_on_rate_limit=wait_on_rate_limit)
 
     try:
         user = api.verify_credentials()
@@ -112,6 +112,7 @@ def prune_tweets(
     days: int = settings.twitter.tweet_prune_days,
     delete_liked: bool = settings.twitter.is_delete_liked,
     dry_run: bool = False,
+    wait_on_rate_limit: bool = True,
 ):
     """Delete old tweets.
 
@@ -130,7 +131,7 @@ def prune_tweets(
     limit = TODAY - datetime.timedelta(days=days)
     LOGGER.info(f"Tweets older than {days} days ({limit}) will be deleted")
 
-    api = _authenticate()
+    api = _authenticate(wait_on_rate_limit=wait_on_rate_limit)
     LOGGER.info(f"Authenticated as {api.verify_credentials().screen_name}")
 
     LOGGER.info("Fetching tweets...")
@@ -155,7 +156,9 @@ def prune_tweets(
 
 
 def prune_friends(
-    days: int = settings.twitter.friend_prune_days, dry_run: bool = False
+    days: int = settings.twitter.friend_prune_days,
+    dry_run: bool = False,
+    wait_on_rate_limit: bool = True,
 ):
     """Delete old friends.
 
@@ -174,7 +177,7 @@ def prune_friends(
     LOGGER.info(f"Friends inactive since {days} days will be unfriended")
 
     # auth
-    api = _authenticate()
+    api = _authenticate(wait_on_rate_limit=wait_on_rate_limit)
 
     # prune
     screen_name = api.verify_credentials().screen_name
