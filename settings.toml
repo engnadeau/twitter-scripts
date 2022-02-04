@@ -1,10 +1,11 @@
-output_directory="out"
+timezone="Canada/Eastern"
 
 [twitter]
 tweepy_sleep_time=910
 tweet_prune_days=60
 is_delete_liked=false
 friend_prune_days=30
+date_fmt = "%a %b %d %H:%M:%S +0000 %Y"
 
 [logging]
 version=1
