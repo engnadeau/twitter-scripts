@@ -2,9 +2,9 @@ name: Prune Twitter Friends
 
 on:
   schedule:
-    # at 00:00 everyday
+    # Runs at 00:00 UTC on Sun and Wed. 
     # https://crontab.guru
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * 0,3"
   workflow_dispatch:
   pull_request:
   push:
