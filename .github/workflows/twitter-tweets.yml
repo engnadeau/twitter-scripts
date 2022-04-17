@@ -2,9 +2,9 @@ name: Prune Twitter Tweet
 
 on:
   schedule:
-    # at 12:00 everyday
+    # Runs at 00:00 UTC on Tue and Fri.
     # https://crontab.guru
-    - cron: "0 12 * * *"
+    - cron: "0 0 * * 2,5"
   workflow_dispatch:
   pull_request:
   push:
