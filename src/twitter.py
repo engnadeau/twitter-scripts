@@ -220,5 +220,19 @@ def prune_friends(
     LOGGER.info("Pruning complete")
 
 
+def get_people_from_hashtag(hashtag: str, count: int = 200):
+    """Get people from a hashtag.
+
+    Args:
+        hashtag (str): Hashtag to search for.
+        count (int, optional): Number of people to return. Defaults to 100.
+    """
+    api = _authenticate()
+    LOGGER.info(f"Fetching people from {hashtag}")
+    people = api.search_users(q=f"#{hashtag}", count=count)
+    LOGGER.info(f"Retrieved {len(people)} people")
+    return people
+
+
 if __name__ == "__main__":
     fire.Fire()
