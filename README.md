@@ -10,7 +10,7 @@ Using [GitHub Actions](https://github.com/nnadeau/social-media-cron/actions) as 
 - *Infrastructure as code* is a great idea
 - I have too many Raspberry Pis and hobby servers to manage
 
-## Usage
+## Development & Usage
 
 - Secrets are stored as [repository secrets](https://docs.github.com/en/actions/reference/encrypted-secrets) and access as [environment variables in the workflow](https://docs.github.com/en/actions/reference/encrypted-secrets#using-encrypted-secrets-in-a-workflow)
   - [Repository secrets settings](https://github.com/nnadeau/social-media-cron/settings/secrets/actions)
@@ -20,6 +20,11 @@ Using [GitHub Actions](https://github.com/nnadeau/social-media-cron/actions) as 
 ### Twitter
 
 - Get your tokens from [the developer portal](https://developer.twitter.com/en/portal/dashboard)
+
+### GitHub Actions
+
+- This repo uses [`semantic-releases`](https://github.com/semantic-release/) to generate releases and release notes automatically from commits
+  - A [`PERSONAL_TOKEN` Actions secret](https://github.com/nnadeau/social-media-cron/settings/secrets/actions) from a [Personal Token](https://github.com/settings/tokens) with a [`public_repo` scope](https://github.com/semantic-release/github#github-authentication) is needed for CI releases
 
 ---
 
