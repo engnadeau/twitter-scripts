@@ -65,7 +65,7 @@ def get_followers(screen_name: Optional[str] = None, count: int = 200):
     # dump to file
     output_path = Path().cwd() / f"{screen_name}-followers.json".lower()
     LOGGER.info(f"Dumping results to {output_path.resolve()}")
-    with open(output_path, "w") as f:
+    with open(output_path, mode="w", encoding="utf-8") as f:
         json.dump(obj=followers, fp=f, indent=4)
 
 
@@ -99,7 +99,7 @@ def get_friends(screen_name: Optional[str] = None, count: int = 200):
     # dump to file
     output_path = Path().cwd() / f"{screen_name}-friends.json".lower()
     LOGGER.info(f"Dumping results to {output_path.resolve()}")
-    with open(output_path, "w") as f:
+    with open(output_path, mode="w", encoding="utf-8") as f:
         json.dump(obj=friends, fp=f, indent=4)
 
 

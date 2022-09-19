@@ -24,7 +24,7 @@ def twitter_heatmap(*users: str, output: str = "twitter_heatmap.png"):
     for user in users:
         path = Path(user)
         LOGGER.info(f"Processing {path}...")
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             user_data.extend(json.load(f))
 
     # extract last status times
